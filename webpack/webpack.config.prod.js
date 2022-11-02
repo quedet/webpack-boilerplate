@@ -18,6 +18,7 @@ const config = require('./webpack.config.common')
 // Merge commun config to dev and exports
 module.exports = merge(config, {
     mode: 'production',
+    target: 'browserslist',
     devtool: 'inline-source-map',
     optimization: {
         minimize: true,

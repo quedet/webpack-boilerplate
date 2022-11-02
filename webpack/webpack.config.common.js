@@ -7,6 +7,7 @@ const Webpack = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin')
 
 const path = require('path')
 const glob = require('glob')
@@ -46,11 +47,28 @@ const getEntryFiles = () => {
 // Module to export
 module.exports = {
     entry: getEntryFiles(),
-    target: 'web',
     output: {
         path: path.join(BASE_DIR, 'public'),
         filename: 'js/[name].js',
-        clean: true
+        clean: true,
+        assetModuleFilename: 'images/[hash][ext][query]'
+    },
+    optimization: {
+        minimize: true,
+        minimizer: [
+            new ImageMinimizerPlugin({
+                minimizer: {
+                    implementation: ImageMinimizerPlugin.imageminMinify,
+                    options: {
+                        plugins: [
+                            ["gifsicle", { interlaced: true }],
+                            ["jpegtran", { progressive: true }],
+                            ["optipng", { optimizationLevel: 5 }],
+                        ]
+                    }
+                }
+            })
+        ]
     },
     module: {
         rules: [
@@ -76,6 +94,10 @@ module.exports = {
                         presets: ['@babel/preset-env']
                     }
                 }
+            },
+            {
+                test: /\.(png|jpe?g|gif|svg)$/i,
+                type: 'asset'
             }
         ]
     },

@@ -18,7 +18,8 @@ const config = require('./webpack.config.common')
 
 // Merge commun config to dev and exports
 module.exports = merge(config, {
-    mode: 'development',
+    mode: 'development',    
+    target: 'web',
     devtool: 'inline-source-map',
     devServer: {
         hot: true,
