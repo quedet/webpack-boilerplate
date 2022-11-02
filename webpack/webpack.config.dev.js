@@ -21,6 +21,7 @@ module.exports = merge(config, {
     mode: 'development',
     devtool: 'inline-source-map',
     devServer: {
+        hot: true,
         static: {
             directory: path.join(BASE_DIR, 'public')
         },
