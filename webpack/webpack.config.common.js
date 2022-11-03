@@ -15,7 +15,12 @@ const glob = require('glob')
 /**
  * VARIABLES
  */
+const IS_DEVELOPMENT = process.env.NODE_ENV === 'development'
 const BASE_DIR = path.resolve(__dirname, '..')
+const dirApp = path.join(BASE_DIR, 'src/app')
+const dirAssets = path.join(BASE_DIR, 'src/assets')
+const dirStyles = path.join(BASE_DIR, 'src/styles')
+const dirNodes = path.join(BASE_DIR, 'node_modules')
 
 /**
  * FUNCTIONS
@@ -32,7 +37,7 @@ const getEntryFiles = () => {
     // Get all Javascript Files and Subfiles in 'src/app' folder
     glob.sync(path.join(BASE_DIR, 'src/app/**/*.js')).forEach(pathname => {
         const name = path.basename(pathname, ".js")
-        entries[name] = pathname
+        entries[name]= pathname
     })
 
     // Get all CSS Files and Subfiles in 'src/styles' folder
@@ -63,11 +68,18 @@ module.exports = {
                         plugins: [
                             ["gifsicle", { interlaced: true }],
                             ["jpegtran", { progressive: true }],
-                            ["optipng", { optimizationLevel: 5 }],
+                            ["optipng", { optimizationLevel: 8 }],
                         ]
                     }
                 }
             })
+        ]
+    },
+    resolve: {
+        modules: [
+            dirApp,
+            dirAssets,
+            dirNodes,
         ]
     },
     module: {
@@ -96,12 +108,40 @@ module.exports = {
                 }
             },
             {
-                test: /\.(png|jpe?g|gif|svg)$/i,
-                type: 'asset'
+                test: /\.(png|jpe?g|gif|svg|woff2?|fnt|webp)$/i,
+                type: 'asset',
+                loader: 'file-loader'
+            },
+            {
+                test: /\.(png|jpe?g|gif|svg|woff2?|fnt|webp)$/i,
+                type: 'asset',
+                loader: ImageMinimizerPlugin.loader,
+                options: {
+                    securityError: 'warning',
+                    minimizerOptions: {
+                        plugins: ['gifsicle']
+                    }
+                }
+            },
+            {
+                test: /\.(glsl|frag|vert)$/i,
+                loader: 'raw-loader',
+                exclude: /node_modules/
+            },
+            {
+                test: /\.(glsl|frag|vert)$/i,
+                loader: 'glslify-loader',
+                exclude: /node_modules/
             }
         ]
     },
     plugins: [
+        new Webpack.DefinePlugin({
+            IS_DEVELOPMENT
+        }),
+        new Webpack.ProvidePlugin({
+
+        }),
         new CleanWebpackPlugin,
         new MiniCssExtractPlugin({
             filename: 'css/[name].css',
